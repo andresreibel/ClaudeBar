@@ -33,8 +33,8 @@ function calcPacing(usagePct: number, resetAt: string, windowMs: number): { icon
   const msLeft = new Date(resetAt).getTime() - Date.now();
   const timeElapsedPct = ((windowMs - msLeft) / windowMs) * 100;
   const pacing = timeElapsedPct > 0 ? usagePct / timeElapsedPct : 0;
-  if (pacing > 1.2) return { icon: "↑", status: `${Math.round((pacing - 1) * 100)}% ahead` };
-  if (pacing < 0.8) return { icon: "↓", status: `${Math.round((1 - pacing) * 100)}% under` };
+  if (pacing > 1.05) return { icon: "↑", status: `${Math.round((pacing - 1) * 100)}% ahead` };
+  if (pacing < 0.95) return { icon: "↓", status: `${Math.round((1 - pacing) * 100)}% under` };
   return { icon: "→", status: "on track" };
 }
 
