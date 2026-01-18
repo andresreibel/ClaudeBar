@@ -4,11 +4,14 @@
  * Uses official Claude OAuth API for exact usage data
  */
 
-import { readFile } from "fs/promises";
+import { readFile, writeFile } from "fs/promises";
 import { homedir } from "os";
 
 const CREDS_PATH = `${homedir()}/.claude/.credentials.json`;
 const API_URL = "https://api.anthropic.com/api/oauth/usage";
+const TOKEN_URL = "https://console.anthropic.com/v1/oauth/token";
+const CLIENT_ID = "9d1c250a-e61b-44d9-88ed-5944d1962f5e"; // Claude Max OAuth client ID
+const REFRESH_BUFFER_MS = 5 * 60 * 1000; // Refresh 5 min before expiry
 
 interface UsageWindow {
   utilization: number;
@@ -38,18 +41,55 @@ function calcPacing(usagePct: number, resetAt: string, windowMs: number): { icon
   return { icon: "→", status: "on track" };
 }
 
+async function refreshToken(creds: any): Promise<boolean> {
+  const oauth = creds.claudeAiOauth;
+  if (!oauth?.refreshToken) return false;
+
+  try {
+    const res = await fetch(TOKEN_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({
+        grant_type: "refresh_token",
+        client_id: CLIENT_ID,
+        refresh_token: oauth.refreshToken,
+      }),
+    });
+
+    if (!res.ok) return false;
+
+    const data = await res.json();
+    creds.claudeAiOauth = {
+      ...oauth,
+      accessToken: data.access_token,
+      refreshToken: data.refresh_token || oauth.refreshToken,
+      expiresAt: Date.now() + data.expires_in * 1000,
+    };
+
+    await writeFile(CREDS_PATH, JSON.stringify(creds, null, 2));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 async function main() {
   const creds = JSON.parse(await readFile(CREDS_PATH, "utf-8"));
-  const oauth = creds.claudeAiOauth;
+  let oauth = creds.claudeAiOauth;
 
   if (!oauth?.accessToken) {
     console.log(JSON.stringify({ text: "⚠ auth", tooltip: "No token. Run: claude", class: "error" }));
     return;
   }
 
-  if (oauth.expiresAt < Date.now()) {
-    console.log(JSON.stringify({ text: "⚠ exp", tooltip: "Token expired. Run: claude", class: "error" }));
-    return;
+  // Auto-refresh if expired or expiring soon
+  if (oauth.expiresAt < Date.now() + REFRESH_BUFFER_MS) {
+    if (await refreshToken(creds)) {
+      oauth = creds.claudeAiOauth; // Use refreshed token
+    } else {
+      console.log(JSON.stringify({ text: "⚠ exp", tooltip: "Token expired. Run: claude", class: "error" }));
+      return;
+    }
   }
 
   const res = await fetch(API_URL, {
