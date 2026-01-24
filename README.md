@@ -53,12 +53,12 @@ killall waybar && waybar &
 ## What It Shows
 
 ```
-↓S8% ↓W27% 3h53m
-│ │   │ │   └── Session resets in 3h 53m
-│ │   │ └────── Weekly: 27% of 7-day limit
-│ │   └──────── Weekly pacing indicator
-│ └──────────── Session: 8% of 5-hour window
-└────────────── Session pacing indicator
+↓S78% ↓W24% 3h26m
+│ │    │ │   └── Session resets in 3h 26m
+│ │    │ └────── Weekly: 24% under pace
+│ │    └──────── Weekly pacing indicator
+│ └───────────── Session: 78% under pace
+└─────────────── Session pacing indicator
 ```
 
 **Pacing indicators:**
@@ -96,8 +96,8 @@ Add to `~/.config/waybar/style.css`:
 #custom-claudebar.critical { color: #f7768e; }
 ```
 
-- **≥75%** → cosmic orange (warning)
-- **≥90%** → red (critical)
+- **Weekly 10%+ ahead of pace** or **≥75% used** → orange (warning)
+- **Weekly 25%+ ahead of pace** or **≥90% used** → red (critical)
 
 ## Related
 
