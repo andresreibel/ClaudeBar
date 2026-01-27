@@ -52,6 +52,7 @@ killall waybar && waybar &
 
 ## What It Shows
 
+**Bar:**
 ```
 ↓W24% 3h26m
 │ │   └──── Weekly resets in 3h 26m
@@ -59,7 +60,18 @@ killall waybar && waybar &
 └───────── Pacing indicator (↓ under, → on track, ↑ ahead)
 ```
 
-Hover for session details.
+**Tooltip (hover):**
+```
+Session: 7% (63% under)
+         │   └─────────── 63% under expected pace for this session
+         └────────────── 7% of session limit used
+
+Weekly: 55% (27% under)
+        │    └────────── 27% under expected pace for the week
+        └─────────────── 55% of weekly limit used
+```
+
+Pacing compares your actual usage to where you'd be if spending evenly across the period.
 
 ## Requirements
 
