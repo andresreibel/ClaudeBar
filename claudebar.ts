@@ -36,8 +36,10 @@ function calcPacing(usagePct: number, resetAt: string, windowMs: number): { icon
   const msLeft = new Date(resetAt).getTime() - Date.now();
   const timeElapsedPct = Math.round(((windowMs - msLeft) / windowMs) * 100);
   const pacing = timeElapsedPct > 0 ? usagePct / timeElapsedPct : 0;
-  if (pacing > 1.05) { const d = Math.round((pacing - 1) * 100); return { icon: "↑", status: `${d}% ahead`, devPct: d, timeElapsedPct }; }
-  if (pacing < 0.95) { const d = Math.round((1 - pacing) * 100); return { icon: "↓", status: `${d}% under`, devPct: -d, timeElapsedPct }; }
+  if (pacing > 1.10) { const d = Math.round((pacing - 1) * 100); return { icon: "↑", status: `${d}% ahead`, devPct: d, timeElapsedPct }; }
+  if (pacing > 1.05) { const d = Math.round((pacing - 1) * 100); return { icon: "↗", status: `${d}% ahead`, devPct: d, timeElapsedPct }; }
+  if (pacing < 0.90) { const d = Math.round((1 - pacing) * 100); return { icon: "↓", status: `${d}% under`, devPct: -d, timeElapsedPct }; }
+  if (pacing < 0.95) { const d = Math.round((1 - pacing) * 100); return { icon: "↘", status: `${d}% under`, devPct: -d, timeElapsedPct }; }
   return { icon: "→", status: "on track", devPct: 0, timeElapsedPct };
 }
 
@@ -116,17 +118,18 @@ async function main() {
   const sessionPacing = calcPacing(sessionPct, session.resets_at, 5 * 60 * 60 * 1000);
   const weeklyPacing = calcPacing(weeklyPct, weekly.resets_at, 7 * 24 * 60 * 60 * 1000);
 
-  const weeklyAhead = weeklyPacing.devPct;
+  const pacing = weeklyPacing.timeElapsedPct > 0 ? weeklyPct / weeklyPacing.timeElapsedPct : 0;
   const cssClass =
-    (weeklyAhead >= 25 || weeklyPct >= 90) ? "critical" :
-    (weeklyAhead >= 10 || weeklyPct >= 75) ? "warning" : "";
+    (pacing > 1.10 || weeklyPct >= 90) ? "critical" :
+    (pacing > 1.05 || weeklyPct >= 75) ? "warning" :
+    (pacing < 0.95 && pacing >= 0.90) ? "easy" : "";
 
   const sessionDev = Math.abs(sessionPacing.devPct);
   const weeklyDev = Math.abs(weeklyPacing.devPct);
 
   console.log(
     JSON.stringify({
-      text: `◉${weeklyPct}% ${weeklyPacing.icon} ⧖${weeklyPacing.timeElapsedPct}% ${weeklyCountdown}`,
+      text: `${weeklyPacing.icon} ◉${weeklyPct}% ⧖${weeklyPacing.timeElapsedPct}% ${weeklyCountdown}`,
       tooltip: [
         "ClaudeBar",
         "─────────────────",

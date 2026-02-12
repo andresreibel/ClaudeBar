@@ -54,10 +54,10 @@ killall waybar && waybar &
 
 **Bar:**
 ```
-◉66% ↓ ⧖88% 19h47m
+◉66% ↘ ⧖88% 19h47m
  │   │  │   └────── Weekly resets in 19h 47m
  │   │  └────────── 88% of weekly window elapsed
- │   └───────────── Pacing (↓ under, → on track, ↑ ahead)
+ │   └───────────── Pacing: ↑ well ahead, ↗ slightly ahead, → on track, ↘ slightly under, ↓ well under
  └───────────────── 66% of weekly limit used
 ```
 
@@ -101,12 +101,17 @@ Pacing compares your actual usage to where you'd be if spending evenly across th
 Add to `~/.config/waybar/style.css`:
 
 ```css
+#custom-claudebar.easy { color: #e0af68; }
 #custom-claudebar.warning { color: #ff9e64; }
 #custom-claudebar.critical { color: #f7768e; }
 ```
 
-- **Weekly 10%+ ahead of pace** or **≥75% used** → orange (warning)
-- **Weekly 25%+ ahead of pace** or **≥90% used** → red (critical)
+| Color | Class | When |
+|-------|-------|------|
+| White | (default) | On track or well under pace |
+| Gold | `easy` | Slightly under pace (0.90–0.95x) — coasting |
+| Orange | `warning` | Slightly ahead (>1.05x pace) or ≥75% used |
+| Red | `critical` | Well ahead (>1.10x pace) or ≥90% used |
 
 ## Related
 
